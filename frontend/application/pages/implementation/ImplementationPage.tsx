@@ -1,27 +1,15 @@
 import * as React from "react";
 import * as css from "./ImplementationPage.module.scss";
+import "regenerator-runtime/runtime.js";
+import { getInterface, getElevatorPositions, moveElevator } from "./api-utils";
 
-const floors = Array.from(Array(20).keys()).reverse();
-const elevatorsInit = Array.from(Array(5).keys());
+const getFloorId = (elevator: number, floor: number) => `e${elevator}f${floor}`;
 
-const getFloorId = (elevator: number, floor: number) => `e${elevator}f${floor}`
+const generateFloors = (elevator: number, floors: number[]): JSX.Element[] => floors.map((floor) => <div id={getFloorId(elevator, floor)} key={getFloorId(elevator, floor)}>floor {floor}</div>);
+const createInterface = (elevators: number[], floors: number[]): JSX.Element[] => elevators.map((elevator) => <div id={(elevator).toString()} key={elevator}>{generateFloors(elevator, floors)}</div>);
 
-const generateFloors = (elevator: number): JSX.Element[] => floors.map((floor) => <div key={getFloorId(elevator, floor)}>floor {floor}</div>);
-const createInterface = (): JSX.Element[] => elevatorsInit.map((elevator) => <div id={(elevator).toString()}>{generateFloors(elevator)}</div>);
-
-
-type board = boolean[][]
-
-const initBoard: board = [
-    [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
-    [false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false],
-    [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true],
-    [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
-    [false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
-];
-
-const visualizeElevators = (board: board): void => {
-    board.forEach((elevators, elevator) => {
+const visualizeElevators = (elevatorPositions: ElevatorPositions): void => {
+    elevatorPositions.forEach((elevators, elevator) => {
         elevators.forEach((elevatorOnFloor, floor) => {
             const floorElement = document.getElementById(getFloorId(elevator, floor));
             elevatorOnFloor
@@ -32,66 +20,31 @@ const visualizeElevators = (board: board): void => {
 };
 
 const ImplementationPage = () => {
+    const [destinationFloor, setDestinationFloor] = React.useState<string>("0");
+    const [elevatorInterface, setElevatorInterface] = React.useState<JSX.Element[]>([]);
 
-    const [boardState, setBoardState] = React.useState(initBoard)
-    const [destinationFloor, setDestinationFloor] = React.useState("0");
-
-    const moveElevator = () => {
-        let floor = parseInt(destinationFloor, 10);
-        let exit = true;
-        let iteration = 0;
-
-        while (exit) {
-
-            for (let elevator = 0; elevator < boardState.length; elevator++) {
-                
-                console.log("check floor", floor + iteration, " and ", floor - iteration);
-                const above = boardState[elevator][floor + iteration];
-
-                if (above) {
-                    console.log(floor + iteration, " floor is elevator");
-                    const newBoardState = boardState;
-                    newBoardState[elevator][floor + iteration] = false;
-                    newBoardState[elevator][floor] = true;
-                    setBoardState(newBoardState);
-                    visualizeElevators(newBoardState);
-                    exit = false
-                    break;
-                }
-                const below =  boardState[elevator][floor - iteration];
-                if (below) {
-                    console.log(floor - iteration, " floor is elevator");
-                    const newBoardState = boardState;
-                    newBoardState[elevator][floor - iteration] = false;
-                    newBoardState[elevator][floor] = true;
-                    setBoardState(newBoardState);
-                    visualizeElevators(newBoardState);
-                    exit = false
-                    break;
-
-                }
-
-            }
-
-            iteration = iteration + 1
-
-
-
-        }
-
+    const onClick = async (): Promise<void> => {
+        const elevatorPositions = await moveElevator(Number.parseInt(destinationFloor));
+        visualizeElevators(elevatorPositions);
     }
 
-    React.useEffect(() => {
-        visualizeElevators(boardState);
-    }, [])
+    React.useEffect((): void => {
+        const init = async (): Promise<void> => {
+            const [elevators, floors] = await getInterface();
+            setElevatorInterface(createInterface(elevators, floors));
+            const elevatorsPositions = await getElevatorPositions();
+            visualizeElevators(elevatorsPositions);
+        }
 
+        init();
+    }, []);
 
     return (
         <>
             <h2 className={css.title}>Lägg implementationen här</h2>
             <div className={css.container}>
 
-                {createInterface()}
+                {elevatorInterface}
             </div>
 
             <div>
@@ -103,12 +56,12 @@ const ImplementationPage = () => {
                     onChange={(e) => setDestinationFloor(e.target.value)}
                 />
 
-                <button onClick={moveElevator}>Elevator</button>
+                <button onClick={onClick}>Elevator</button>
+
             </div>
 
         </>
     );
-}
-
+};
 
 export default ImplementationPage;

@@ -5,3 +5,5 @@ declare module "*.module.scss" {
     const classNames: IClassNames;
     export = classNames;
 }
+
+type ElevatorPositions = boolean[][]
