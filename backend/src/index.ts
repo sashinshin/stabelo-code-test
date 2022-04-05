@@ -2,8 +2,9 @@ import * as cors from "kcors";
 import * as Koa from "koa";
 import * as bodyparser from "koa-bodyparser";
 import * as Router from "koa-router";
+
 import config from "./config";
-import { getMoveElevatorData, generateElevatorPositions, moveElevator } from "./utils";
+import { generateElevatorPositions, getMoveElevatorData, moveElevator } from "./utils";
 
 const app = new Koa();
 const router = new Router();

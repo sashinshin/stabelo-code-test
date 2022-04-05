@@ -1,6 +1,6 @@
+import "regenerator-runtime/runtime.js";
 import * as React from "react";
 import * as css from "./ImplementationPage.module.scss";
-import "regenerator-runtime/runtime.js";
 import { getInterfaceSpecs, getElevatorPositions, moveElevator } from "./api-utils";
 
 const getFloorId = (elevator: number, floor: number) => `e${elevator}f${floor}`;
@@ -39,8 +39,8 @@ const ImplementationPage = () => {
     };
 
     const onClick = async (): Promise<void> => {
-        const destinationFloorInt = Number.parseInt(destinationFloor);
-        if (destinationFloorInt > Number.parseInt(maxFloors) || 0 > destinationFloorInt) {
+        const destinationFloorInt = Number.parseInt(destinationFloor, 10);
+        if (destinationFloorInt > Number.parseInt(maxFloors, 10) || 0 > destinationFloorInt) {
             throw new Error("Invalid destination floor");
         }
         setLoading(true);
