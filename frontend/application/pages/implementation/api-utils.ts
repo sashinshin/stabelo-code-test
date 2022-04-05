@@ -31,13 +31,13 @@ export const getElevatorPositions = async (): Promise<ElevatorPositions> => {
     return response;
 }
 
-export const moveElevator = async (destinationFloor: number): Promise<[ElevatorPositions, number]> => {
-    const response = await apiCall<any>(
+export const moveElevator = async (destinationFloor: number): Promise<number> => {
+    const response = await apiCall<number>(
         "api/positions",
         "PATCH",
         { "Content-Type": "application/json" },
         JSON.stringify({ destinationFloor }),
     );
 
-    return [response.elevatorPositions, response.iterations];
+    return response;
 }

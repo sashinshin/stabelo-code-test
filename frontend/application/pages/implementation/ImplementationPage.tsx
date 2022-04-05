@@ -19,15 +19,29 @@ const visualizeElevators = (elevatorPositions: ElevatorPositions): void => {
     });
 };
 
+const poller = async (floorsToTravel: number): Promise<void> => {
+    if (floorsToTravel >= 0) {
+        setTimeout(async () => {
+            const elevatorsPositions = await getElevatorPositions();
+            visualizeElevators(elevatorsPositions);
+            poller(floorsToTravel - 1);
+        }, 2000)
+    }
+}
+
+const test = async () => {
+    const elevatorsPositions = await getElevatorPositions();
+    visualizeElevators(elevatorsPositions);
+}
+
+
 const ImplementationPage = () => {
     const [destinationFloor, setDestinationFloor] = React.useState<string>("0");
     const [elevatorInterface, setElevatorInterface] = React.useState<JSX.Element[]>([]);
 
     const onClick = async (): Promise<void> => {
-        const [elevatorPositions, iterations] = await moveElevator(Number.parseInt(destinationFloor));
-        console.log(iterations);
-        
-        visualizeElevators(elevatorPositions);
+        const floorsToTravel = await moveElevator(Number.parseInt(destinationFloor));
+        poller(floorsToTravel);
     }
 
     React.useEffect((): void => {
@@ -59,6 +73,8 @@ const ImplementationPage = () => {
                 />
 
                 <button onClick={onClick}>Elevator</button>
+                <button onClick={test}>test</button>
+
 
             </div>
 

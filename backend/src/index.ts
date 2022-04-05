@@ -2,16 +2,14 @@ import * as cors from "kcors";
 import * as Koa from "koa";
 import * as bodyparser from "koa-bodyparser";
 import * as Router from "koa-router";
+import config from "./config"
+import { moveElevator } from "./utils";
 
 const app = new Koa();
 const router = new Router();
 
-const PORT = 3000;
+const { PORT, FLOORS, ELEVATORS } = config;
 
-const FLOORS = 20;
-const ELEVATORS = 5;
-
-let callsBlocked = false;
 
 const generateElevators = (): boolean[][] => {
     const floors = new Array(FLOORS).fill(false);
@@ -21,68 +19,36 @@ const generateElevators = (): boolean[][] => {
 };
 
 let elevatorPositions: boolean[][] = generateElevators();
-
-const moveElevator = (destinationFloor: number) => {
-    if (destinationFloor > FLOORS) {
-        throw new Error("Invalid floor")
-    }
-    let loop = true;
-    let iterations = 0;
-    const newPositions = elevatorPositions;
-
-    while (loop) {
-        for (let elevator = 0; elevator < elevatorPositions.length; elevator++) {
-            const above = elevatorPositions[elevator][destinationFloor + iterations];
-            if (above) {
-                newPositions[elevator][destinationFloor + iterations] = false;
-                newPositions[elevator][destinationFloor] = true;
-
-                return {
-                    newPositions,
-                    iterations,
-                    above: true,
-                }
-            }
-            const below = elevatorPositions[elevator][destinationFloor - iterations];
-            if (below) {
-                newPositions[elevator][destinationFloor - iterations] = false;
-                newPositions[elevator][destinationFloor] = true;
-
-                return {
-                    newPositions,
-                    iterations,
-                    above: false,
-                }
-            }
-        }
-
-        iterations = iterations + 1
-        if (iterations > FLOORS) {
-            throw new Error("Too many iterations")
-        }
-    }
-}
+let callsBlocked = false;
 
 
-router.get("/api/init", (context) => {
-    context.response.body = {
-        message: {
-            floors: Array.from(Array(FLOORS).keys()).reverse(),
-            elevators: Array.from(Array(ELEVATORS).keys())
-        }
-    }
-});
+const timeout = (floorsTravelled: number, floorsToTravel: number, elevator: number, above: boolean, floorWithElevator: number): void => {
+    if (floorsToTravel > floorsTravelled) {
+        setTimeout(() => {
 
-const timeout = (newPositions: boolean[][], floorsTravelled: number, above: boolean) => {
-    console.log("timeout: ",floorsTravelled*2000);
-    
-    setTimeout(() => {
-        elevatorPositions = newPositions;
+            const newFloorWithElevator = above ? floorWithElevator - 1 : floorWithElevator + 1;
+            elevatorPositions[elevator][floorWithElevator] = false;
+            elevatorPositions[elevator][newFloorWithElevator] = true;
+
+            timeout(floorsTravelled + 1, floorsToTravel, elevator, above, newFloorWithElevator);
+
+            console.log("travelled ", floorsTravelled + 1, " stops");
+
+        }, 2000);
+    } else {
         callsBlocked = false;
-        console.log("timeout over");
-        
-    }, floorsTravelled*2000);
-}
+    };
+};
+
+router
+    .get("/api/init", (context) => {
+        context.response.body = {
+            message: {
+                floors: Array.from(Array(FLOORS).keys()).reverse(),
+                elevators: Array.from(Array(ELEVATORS).keys())
+            }
+        }
+    });
 
 router
     .get("/api/positions", (context) => {
@@ -97,23 +63,20 @@ router
 
 
             const destinationFloor = context.request.body.destinationFloor;
-            const { newPositions, iterations, above } = moveElevator(destinationFloor);
 
-            callsBlocked = true;
-            timeout(newPositions, iterations, above);
+            try {
+                const { elevator, iterations, above, floorWithElevator } = moveElevator(destinationFloor, elevatorPositions);
+                callsBlocked = true;
+                timeout(0, iterations, elevator, above, floorWithElevator);
 
-
-            context.response.body = {
-                message: {
-                    elevatorPositions: newPositions,
-                    iterations
-                }
-            };
-            context.response.status = 200;
+                context.response.body = { message: iterations };
+                context.response.status = 200;
+            } catch (error) {
+                // handle error here
+            }
         }
 
     });
-
 
 
 
