@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as css from "./ImplementationPage.module.scss";
 import "regenerator-runtime/runtime.js";
-import { getInterface, getElevatorPositions, moveElevator } from "./api-utils";
+import { getInterfaceSpecs, getElevatorPositions, moveElevator } from "./api-utils";
 
 const getFloorId = (elevator: number, floor: number) => `e${elevator}f${floor}`;
 
@@ -46,12 +46,11 @@ const ImplementationPage = () => {
 
     React.useEffect((): void => {
         const init = async (): Promise<void> => {
-            const [elevators, floors] = await getInterface();
+            const [elevators, floors] = await getInterfaceSpecs();
             setElevatorInterface(createInterface(elevators, floors));
             const elevatorsPositions = await getElevatorPositions();
             visualizeElevators(elevatorsPositions);
         }
-
         init();
     }, []);
 

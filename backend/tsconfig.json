@@ -17,5 +17,8 @@
     "exclude": [
         "src/**/*.test.ts",
         "node_modules"
+    ],
+    "files": [
+        ".ambient.d.ts"
     ]
 }

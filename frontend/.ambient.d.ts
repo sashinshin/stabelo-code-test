@@ -6,4 +6,4 @@ declare module "*.module.scss" {
     export = classNames;
 }
 
-type ElevatorPositions = boolean[][]
+type ElevatorPositions = boolean[][];

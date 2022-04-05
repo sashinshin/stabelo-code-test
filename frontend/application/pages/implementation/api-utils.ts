@@ -1,4 +1,9 @@
-const apiCall = async<T>(endpoint: string, method: string, headers: HeadersInit, body?: string): Promise<T> => {
+const apiCall = async<T>(
+    endpoint: string,
+    method: string,
+    headers: HeadersInit,
+    body?: string
+): Promise<T> => {
     const response = await fetch(`http://localhost:3000/${endpoint}`, {
         method,
         headers,
@@ -12,7 +17,7 @@ const apiCall = async<T>(endpoint: string, method: string, headers: HeadersInit,
     return parsed.message;
 };
 
-export const getInterface = async (): Promise<number[][]> => {
+export const getInterfaceSpecs = async (): Promise<number[][]> => {
     const response = await apiCall<{ elevators: number[], floors: number[] }>(
         "api/init",
         "GET",
@@ -29,7 +34,7 @@ export const getElevatorPositions = async (): Promise<ElevatorPositions> => {
     );
 
     return response;
-}
+};
 
 export const moveElevator = async (destinationFloor: number): Promise<number> => {
     const response = await apiCall<number>(
@@ -40,4 +45,4 @@ export const moveElevator = async (destinationFloor: number): Promise<number> =>
     );
 
     return response;
-}
+};
