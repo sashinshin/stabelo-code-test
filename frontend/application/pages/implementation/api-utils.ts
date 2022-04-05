@@ -5,7 +5,7 @@ const apiCall = async<T>(endpoint: string, method: string, headers: HeadersInit,
         body,
     });
     const parsed = await response.json();
-    
+
     if (response.status !== 200) {
         throw Error(parsed.message);
     };
@@ -31,13 +31,13 @@ export const getElevatorPositions = async (): Promise<ElevatorPositions> => {
     return response;
 }
 
-export const moveElevator = async (destinationFloor: number): Promise<ElevatorPositions> => {
-    const response = await apiCall<ElevatorPositions>(
+export const moveElevator = async (destinationFloor: number): Promise<[ElevatorPositions, number]> => {
+    const response = await apiCall<any>(
         "api/positions",
         "PATCH",
         { "Content-Type": "application/json" },
         JSON.stringify({ destinationFloor }),
     );
 
-    return response;
+    return [response.elevatorPositions, response.iterations];
 }

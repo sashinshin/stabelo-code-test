@@ -24,7 +24,9 @@ const ImplementationPage = () => {
     const [elevatorInterface, setElevatorInterface] = React.useState<JSX.Element[]>([]);
 
     const onClick = async (): Promise<void> => {
-        const elevatorPositions = await moveElevator(Number.parseInt(destinationFloor));
+        const [elevatorPositions, iterations] = await moveElevator(Number.parseInt(destinationFloor));
+        console.log(iterations);
+        
         visualizeElevators(elevatorPositions);
     }
 

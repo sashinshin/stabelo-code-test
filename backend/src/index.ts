@@ -11,12 +11,13 @@ const PORT = 3000;
 const FLOORS = 20;
 const ELEVATORS = 5;
 
+let callsBlocked = false;
 
 const generateElevators = (): boolean[][] => {
-    const floors = new Array(FLOORS).fill(false)
-    floors[0] = true
+    const floors = new Array(FLOORS).fill(false);
+    floors[0] = true;
     const elevators = new Array(ELEVATORS).fill(null).map(() => [...floors]);
-    return elevators
+    return elevators;
 };
 
 let elevatorPositions: boolean[][] = generateElevators();
@@ -26,35 +27,37 @@ const moveElevator = (destinationFloor: number) => {
         throw new Error("Invalid floor")
     }
     let loop = true;
-    let iteration = 0;
+    let iterations = 0;
     const newPositions = elevatorPositions;
 
     while (loop) {
         for (let elevator = 0; elevator < elevatorPositions.length; elevator++) {
-            const above = elevatorPositions[elevator][destinationFloor + iteration];
+            const above = elevatorPositions[elevator][destinationFloor + iterations];
             if (above) {
-                newPositions[elevator][destinationFloor + iteration] = false;
+                newPositions[elevator][destinationFloor + iterations] = false;
                 newPositions[elevator][destinationFloor] = true;
 
                 return {
                     newPositions,
-                    iteration,
+                    iterations,
+                    above: true,
                 }
             }
-            const below = elevatorPositions[elevator][destinationFloor - iteration];
+            const below = elevatorPositions[elevator][destinationFloor - iterations];
             if (below) {
-                newPositions[elevator][destinationFloor - iteration] = false;
+                newPositions[elevator][destinationFloor - iterations] = false;
                 newPositions[elevator][destinationFloor] = true;
 
                 return {
                     newPositions,
-                    iteration,
+                    iterations,
+                    above: false,
                 }
             }
         }
 
-        iteration = iteration + 1
-        if (iteration > FLOORS) {
+        iterations = iterations + 1
+        if (iterations > FLOORS) {
             throw new Error("Too many iterations")
         }
     }
@@ -70,28 +73,46 @@ router.get("/api/init", (context) => {
     }
 });
 
+const timeout = (newPositions: boolean[][], floorsTravelled: number, above: boolean) => {
+    console.log("timeout: ",floorsTravelled*2000);
+    
+    setTimeout(() => {
+        elevatorPositions = newPositions;
+        callsBlocked = false;
+        console.log("timeout over");
+        
+    }, floorsTravelled*2000);
+}
+
 router
     .get("/api/positions", (context) => {
         context.response.body = { message: elevatorPositions };
         context.response.status = 200;
     })
     .patch("/api/positions", (context) => {
-        console.log("/patch positions");
-
-        // console.log(elevatorPositions);
-
-        // console.log(context.request.body);
-        const newPos = moveElevator(context.request.body.destinationFloor);
-        console.log(newPos);
-        elevatorPositions = newPos.newPositions;
+        if (callsBlocked) {
+            context.response.body = { message: "Elevator currently in movement" }
+            context.response.status = 503;
+        } else {
 
 
+            const destinationFloor = context.request.body.destinationFloor;
+            const { newPositions, iterations, above } = moveElevator(destinationFloor);
+
+            callsBlocked = true;
+            timeout(newPositions, iterations, above);
 
 
+            context.response.body = {
+                message: {
+                    elevatorPositions: newPositions,
+                    iterations
+                }
+            };
+            context.response.status = 200;
+        }
 
-        context.response.body = { message: elevatorPositions };
-        context.response.status = 200;
-    })
+    });
 
 
 
@@ -103,6 +124,5 @@ app.use(cors());
 
 app.use(router.routes());
 
-// app.use(router.allowedMethods());
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
