@@ -19,27 +19,26 @@ const visualizeElevators = (elevatorPositions: ElevatorPositions): void => {
     });
 };
 
-const poller = async (floorsToTravel: number): Promise<void> => {
-    if (floorsToTravel >= 0) {
-        setTimeout(async () => {
-            const elevatorsPositions = await getElevatorPositions();
-            visualizeElevators(elevatorsPositions);
-            poller(floorsToTravel - 1);
-        }, 2000)
-    }
-}
-
-const test = async () => {
-    const elevatorsPositions = await getElevatorPositions();
-    visualizeElevators(elevatorsPositions);
-}
-
 
 const ImplementationPage = () => {
     const [destinationFloor, setDestinationFloor] = React.useState<string>("0");
     const [elevatorInterface, setElevatorInterface] = React.useState<JSX.Element[]>([]);
+    const [loading, setLoading] = React.useState<boolean>(true);
+
+    const poller = async (floorsToTravel: number): Promise<void> => {
+        if (floorsToTravel > 0) {
+            setTimeout(async () => {
+                const elevatorsPositions = await getElevatorPositions();
+                visualizeElevators(elevatorsPositions);
+                poller(floorsToTravel - 1);
+            }, 2000)
+        } else {
+            setLoading(false);
+        }
+    };
 
     const onClick = async (): Promise<void> => {
+        setLoading(true);
         const floorsToTravel = await moveElevator(Number.parseInt(destinationFloor));
         poller(floorsToTravel);
     }
@@ -50,6 +49,7 @@ const ImplementationPage = () => {
             setElevatorInterface(createInterface(elevators, floors));
             const elevatorsPositions = await getElevatorPositions();
             visualizeElevators(elevatorsPositions);
+            setLoading(false);
         }
         init();
     }, []);
@@ -71,9 +71,9 @@ const ImplementationPage = () => {
                     onChange={(e) => setDestinationFloor(e.target.value)}
                 />
 
-                <button onClick={onClick}>Elevator</button>
-                <button onClick={test}>test</button>
-
+                {loading
+                    ? <p>loading...</p>
+                    : <button onClick={onClick}>Elevator</button>}
 
             </div>
 
