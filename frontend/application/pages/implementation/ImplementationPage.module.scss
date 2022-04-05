@@ -1,0 +1,12 @@
+.title {
+  color: red; /* Just an example .. */
+}
+
+.container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.active {
+  background-color: green;
+}
