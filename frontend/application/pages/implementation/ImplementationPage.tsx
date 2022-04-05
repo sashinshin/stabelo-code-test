@@ -23,6 +23,7 @@ const visualizeElevators = (elevatorPositions: ElevatorPositions): void => {
 const ImplementationPage = () => {
     const [destinationFloor, setDestinationFloor] = React.useState<string>("0");
     const [elevatorInterface, setElevatorInterface] = React.useState<JSX.Element[]>([]);
+    const [maxFloors, setMaxFloors] = React.useState<string>("0")
     const [loading, setLoading] = React.useState<boolean>(true);
 
     const poller = async (floorsToTravel: number): Promise<void> => {
@@ -38,15 +39,20 @@ const ImplementationPage = () => {
     };
 
     const onClick = async (): Promise<void> => {
+        const destinationFloorInt = Number.parseInt(destinationFloor);
+        if (destinationFloorInt > Number.parseInt(maxFloors) || 0 > destinationFloorInt) {
+            throw new Error("Invalid destination floor");
+        }
         setLoading(true);
-        const floorsToTravel = await moveElevator(Number.parseInt(destinationFloor));
+        const floorsToTravel = await moveElevator(destinationFloorInt);
         poller(floorsToTravel);
     }
 
     React.useEffect((): void => {
         const init = async (): Promise<void> => {
-            const [elevators, floors] = await getInterfaceSpecs();
-            setElevatorInterface(createInterface(elevators, floors));
+            const [elevatorsArray, floorsArray, floors] = await getInterfaceSpecs();
+            setMaxFloors(floors);
+            setElevatorInterface(createInterface(elevatorsArray, floorsArray));
             const elevatorsPositions = await getElevatorPositions();
             visualizeElevators(elevatorsPositions);
             setLoading(false);
@@ -66,7 +72,7 @@ const ImplementationPage = () => {
                 <input
                     type="number"
                     min="0"
-                    max="19"
+                    max={maxFloors}
                     value={destinationFloor}
                     onChange={(e) => setDestinationFloor(e.target.value)}
                 />

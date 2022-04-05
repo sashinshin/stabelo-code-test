@@ -17,13 +17,13 @@ const apiCall = async<T>(
     return parsed.message;
 };
 
-export const getInterfaceSpecs = async (): Promise<number[][]> => {
-    const response = await apiCall<{ elevators: number[], floors: number[] }>(
+export const getInterfaceSpecs = async (): Promise<[number[], number[], string]> => {
+    const response = await apiCall<{ elevatorsArray: number[], floorsArray: number[], floors: string }>(
         "api/init",
         "GET",
         { "accepts": "application/json" }
     );
-    return [response.elevators, response.floors];
+    return [response.elevatorsArray, response.floorsArray, response.floors];
 };
 
 export const getElevatorPositions = async (): Promise<ElevatorPositions> => {

@@ -20,8 +20,9 @@ router
     .get("/api/init", (context) => {
         context.response.body = {
             message: {
-                floors: Array.from(Array(FLOORS).keys()).reverse(),
-                elevators: Array.from(Array(ELEVATORS).keys())
+                floorsArray: Array.from(Array(FLOORS).keys()).reverse(),
+                elevatorsArray: Array.from(Array(ELEVATORS).keys()),
+                floors: FLOORS.toString(),
             }
         };
     })
