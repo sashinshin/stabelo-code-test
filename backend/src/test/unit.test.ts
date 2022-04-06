@@ -1,15 +1,17 @@
 import * as request from "supertest";
+
 import app from "../app";
-import config from "../utils/config"
+import config from "../utils/config";
+
 const { FLOORS } = config;
 
-describe('1.0 Test api', () => {
+describe("1.0 Test api", () => {
 
     test("1.1 GET /api/init", async () => {
         // when
         const response = await request(
             app.callback())
-            .get('/api/init');
+            .get("/api/init");
 
         // then
         expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
@@ -21,7 +23,7 @@ describe('1.0 Test api', () => {
         // when
         const response = await request(
             app.callback())
-            .get('/api/init');
+            .get("/api/init");
 
         // then
         expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
@@ -37,7 +39,7 @@ describe('1.0 Test api', () => {
         // when
         const response = await request(
             app.callback())
-            .patch('/api/positions')
+            .patch("/api/positions")
             .set({ "Content-Type": "application/json" })
             .send(body);
 
@@ -55,7 +57,7 @@ describe('1.0 Test api', () => {
         // when
         const response = await request(
             app.callback())
-            .patch('/api/positions')
+            .patch("/api/positions")
             .set({ "Content-Type": "application/json" })
             .send(body);
 
