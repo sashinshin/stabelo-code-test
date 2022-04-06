@@ -23,7 +23,7 @@ router
             message: {
                 floorsArray: Array.from(Array(FLOORS).keys()).reverse(),
                 elevatorsArray: Array.from(Array(ELEVATORS).keys()),
-                floors: FLOORS.toString(),
+                floors: (FLOORS - 1).toString(),
             }
         };
     })
@@ -32,18 +32,18 @@ router
         context.response.status = 200;
     })
     .patch("/api/positions", (context) => {
-            const destinationFloor = context.request.body.destinationFloor;
-            try {
-                const { elevator, iterations, elevatorAbove, floorWithElevator } = getMoveElevatorData(destinationFloor, serverData);
-                serverData.movingElevators = [...serverData.movingElevators, elevator];
-                moveElevator(0, iterations, elevator, elevatorAbove, floorWithElevator, serverData);
+        const destinationFloor = context.request.body.destinationFloor;
+        try {
+            const { elevator, iterations, elevatorAbove, floorWithElevator } = getMoveElevatorData(destinationFloor, serverData);
+            serverData.movingElevators = [...serverData.movingElevators, elevator];
+            moveElevator(0, iterations, elevator, elevatorAbove, floorWithElevator, serverData);
 
-                context.response.body = { message: iterations };
-                context.response.status = 200;
-            } catch (error) {
-                context.response.body = { message: error.message };
-                context.response.status = 500;
-            }
+            context.response.body = { message: iterations };
+            context.response.status = 200;
+        } catch (error) {
+            context.response.body = { message: error.message };
+            context.response.status = 500;
+        }
     });
 
 app.use(bodyparser({

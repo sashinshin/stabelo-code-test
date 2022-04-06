@@ -32,7 +32,7 @@ export const getMoveElevatorData = (
             }
         }
     }
-    throw new Error("No elevator available");
+    throw new Error("No elevators available");
 };
 
 export const moveElevator = (

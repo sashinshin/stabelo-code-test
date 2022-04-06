@@ -27,8 +27,17 @@
         "noUnusedLocals": true,
         "skipLibCheck": true,
         "strictNullChecks": false,
-        "suppressImplicitAnyIndexErrors": true
+        "suppressImplicitAnyIndexErrors": true,
+        "types": [
+            "jest"
+        ],
+        "typeRoots": [
+            "./node_modules/@types"
+        ]
     },
+    "include": [
+        "application/**/*"
+    ],
     "exclude": [
         "node_modules"
     ],
