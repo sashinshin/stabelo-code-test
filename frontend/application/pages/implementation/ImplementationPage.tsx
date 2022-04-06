@@ -40,7 +40,7 @@ const ImplementationPage = () => {
     const [destinationFloor, setDestinationFloor] = React.useState<string>("0");
     const [elevatorInterface, setElevatorInterface] = React.useState<JSX.Element[]>([]);
     const [maxFloors, setMaxFloors] = React.useState<string>("0");
-    const [loading, setLoading] = React.useState<boolean>(true);
+    const [errorMessage, setErrorMessage] = React.useState<string>("");
 
     const poller = async (floorsToTravel: number): Promise<void> => {
         if (floorsToTravel > 0) {
@@ -49,20 +49,24 @@ const ImplementationPage = () => {
                 visualizeElevators(elevatorsPositions);
                 poller(floorsToTravel - 1);
             }, 2000)
-        } else {
-            setLoading(false);
         }
     };
 
     const onClick = async (): Promise<void> => {
-        const destinationFloorInt = Number.parseInt(destinationFloor, 10);
-        if (destinationFloorInt > Number.parseInt(maxFloors, 10) || 0 > destinationFloorInt) {
-            throw new Error("Invalid destination floor");
+        try {
+            const destinationFloorInt = Number.parseInt(destinationFloor, 10);
+            if (destinationFloorInt >= Number.parseInt(maxFloors, 10) || 0 > destinationFloorInt) {
+                throw new Error("Invalid destination floor");
+            }
+            const floorsToTravel = await moveElevator(destinationFloorInt);
+            poller(floorsToTravel);
+        } catch (error) {
+            setErrorMessage(error.message as string);
+            setTimeout(() => {
+                setErrorMessage("");
+            }, 2000);
         }
-        setLoading(true);
-        const floorsToTravel = await moveElevator(destinationFloorInt);
-        poller(floorsToTravel);
-    }
+    };
 
     React.useEffect((): void => {
         const init = async (): Promise<void> => {
@@ -71,7 +75,6 @@ const ImplementationPage = () => {
             setElevatorInterface(createInterfaceJSX(elevatorsArray, floorsArray));
             const elevatorsPositions = await getElevatorPositions();
             visualizeElevators(elevatorsPositions);
-            setLoading(false);
         }
         init();
     }, []);
@@ -91,8 +94,8 @@ const ImplementationPage = () => {
                     onChange={(e) => setDestinationFloor(e.target.value)}
                 />
 
-                {loading
-                    ? <div>loading...</div>
+                {errorMessage
+                    ? <div>{errorMessage}</div>
                     : <button onClick={onClick}>Elevator</button>}
 
             </div>

@@ -1,6 +1,6 @@
 interface ServerData {
     elevatorPositions:boolean[][];
-    patchCallsBlocked: boolean;
+    movingElevators: number[];
 }
 
 type ElevatorPositions = boolean[][];

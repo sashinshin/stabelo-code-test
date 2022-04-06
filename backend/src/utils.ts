@@ -10,27 +10,29 @@ export const generateElevatorPositions = (): ElevatorPositions => {
 
 export const getMoveElevatorData = (
     destinationFloor: number,
-    elevatorPositions: ElevatorPositions,
+    serverData: ServerData
 ): MovingElevatorData => {
-    if (destinationFloor > FLOORS || 0 > destinationFloor) {
+    if (destinationFloor >= FLOORS || 0 > destinationFloor) {
         throw new Error("Invalid destination floor");
     }
     for (let iterations = 0; FLOORS > iterations; iterations++) {
-        for (let elevator = 0; elevatorPositions.length > elevator; elevator++) {
-            const elevatorAbove = elevatorPositions[elevator][destinationFloor + iterations];
-            const elevatorBelow = elevatorPositions[elevator][destinationFloor - iterations];
-            if (elevatorAbove || elevatorBelow) {
-                return {
-                    elevator,
-                    iterations,
-                    elevatorAbove,
-                    floorWithElevator: elevatorAbove ? destinationFloor + iterations : destinationFloor - iterations,
-                };
+        for (let elevator = 0; serverData.elevatorPositions.length > elevator; elevator++) {
+
+            if (!serverData.movingElevators.includes(elevator)) {
+                const elevatorAbove = serverData.elevatorPositions[elevator][destinationFloor + iterations];
+                const elevatorBelow = serverData.elevatorPositions[elevator][destinationFloor - iterations];
+                if (elevatorAbove || elevatorBelow) {
+                    return {
+                        elevator,
+                        iterations,
+                        elevatorAbove,
+                        floorWithElevator: elevatorAbove ? destinationFloor + iterations : destinationFloor - iterations,
+                    };
+                }
             }
         }
     }
-
-    throw new Error("Too many iterations");
+    throw new Error("No elevator available");
 };
 
 export const moveElevator = (
@@ -50,6 +52,6 @@ export const moveElevator = (
             moveElevator(floorsTravelled + 1, floorsToTravel, elevator, elevatorAbove, newFloorWithElevator, serverData);
         }, 2000);
     } else {
-        serverData.patchCallsBlocked = false;
+        serverData.movingElevators = serverData.movingElevators.filter((movingElevator) => movingElevator !== elevator);
     }
 };

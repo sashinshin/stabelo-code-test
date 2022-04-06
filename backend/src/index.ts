@@ -13,7 +13,7 @@ const { PORT, FLOORS, ELEVATORS } = config;
 
 const serverData: ServerData = {
     elevatorPositions: generateElevatorPositions(),
-    patchCallsBlocked: false,
+    movingElevators: [],
 };
 
 
@@ -32,27 +32,19 @@ router
         context.response.status = 200;
     })
     .patch("/api/positions", (context) => {
-        if (serverData.patchCallsBlocked) {
-            context.response.body = { message: "Elevator currently in movement" };
-            context.response.status = 503;
-        } else {
-
             const destinationFloor = context.request.body.destinationFloor;
             try {
-                const { elevator, iterations, elevatorAbove, floorWithElevator } = getMoveElevatorData(destinationFloor, serverData.elevatorPositions);
-                serverData.patchCallsBlocked = true;
+                const { elevator, iterations, elevatorAbove, floorWithElevator } = getMoveElevatorData(destinationFloor, serverData);
+                serverData.movingElevators = [...serverData.movingElevators, elevator];
                 moveElevator(0, iterations, elevator, elevatorAbove, floorWithElevator, serverData);
 
                 context.response.body = { message: iterations };
                 context.response.status = 200;
             } catch (error) {
-                // handle error here
+                context.response.body = { message: error.message };
+                context.response.status = 500;
             }
-        }
-
     });
-
-
 
 app.use(bodyparser({
     enableTypes: ["json"],
