@@ -1,12 +1,24 @@
-.title {
-  color: red; /* Just an example .. */
-}
-
-.container {
+.cell-container {
+  margin-top: 5vh;
   display: flex;
   justify-content: space-around;
 }
 
-.active {
+.cell {
+  display: flex;
+  justify-content: center;
+  margin-top: 1px;
+  width: clamp(2em, 45px, 3em);
+  height: 1.5em;
+  border: 2px solid black;
+}
+
+.cell--active {
   background-color: green;
+}
+
+.button-container {
+  margin-top: 1vh;
+  display: flex;
+  justify-content: center;
 }

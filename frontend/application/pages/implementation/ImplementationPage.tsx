@@ -5,16 +5,32 @@ import { getInterfaceSpecs, getElevatorPositions, moveElevator } from "./api-uti
 
 const getFloorId = (elevator: number, floor: number) => `e${elevator}f${floor}`;
 
-const generateFloors = (elevator: number, floors: number[]): JSX.Element[] => floors.map((floor) => <div id={getFloorId(elevator, floor)} key={getFloorId(elevator, floor)}>floor {floor}</div>);
-const createInterface = (elevators: number[], floors: number[]): JSX.Element[] => elevators.map((elevator) => <div id={(elevator).toString()} key={elevator}>{generateFloors(elevator, floors)}</div>);
+const generateFloorsJSX = (
+    elevator: number,
+    floors: number[]
+): JSX.Element[] => (floors.map((floor) => (
+    <div id={getFloorId(elevator, floor)}
+        key={getFloorId(elevator, floor)}
+        className={css.cell}>
+        F{floor}
+    </div>)));
+
+const createInterfaceJSX = (
+    elevators: number[],
+    floors: number[]
+): JSX.Element[] => (elevators.map((elevator) => (
+    <div id={(elevator).toString()}
+        key={elevator}>
+        {generateFloorsJSX(elevator, floors)}
+    </div>)));
 
 const visualizeElevators = (elevatorPositions: ElevatorPositions): void => {
     elevatorPositions.forEach((elevators, elevator) => {
         elevators.forEach((elevatorOnFloor, floor) => {
             const floorElement = document.getElementById(getFloorId(elevator, floor));
             elevatorOnFloor
-                ? floorElement.classList.add(css.active)
-                : floorElement.classList.remove(css.active);
+                ? floorElement.classList.add(css["cell--active"])
+                : floorElement.classList.remove(css["cell--active"]);
         });
     });
 };
@@ -23,7 +39,7 @@ const visualizeElevators = (elevatorPositions: ElevatorPositions): void => {
 const ImplementationPage = () => {
     const [destinationFloor, setDestinationFloor] = React.useState<string>("0");
     const [elevatorInterface, setElevatorInterface] = React.useState<JSX.Element[]>([]);
-    const [maxFloors, setMaxFloors] = React.useState<string>("0")
+    const [maxFloors, setMaxFloors] = React.useState<string>("0");
     const [loading, setLoading] = React.useState<boolean>(true);
 
     const poller = async (floorsToTravel: number): Promise<void> => {
@@ -52,7 +68,7 @@ const ImplementationPage = () => {
         const init = async (): Promise<void> => {
             const [elevatorsArray, floorsArray, floors] = await getInterfaceSpecs();
             setMaxFloors(floors);
-            setElevatorInterface(createInterface(elevatorsArray, floorsArray));
+            setElevatorInterface(createInterfaceJSX(elevatorsArray, floorsArray));
             const elevatorsPositions = await getElevatorPositions();
             visualizeElevators(elevatorsPositions);
             setLoading(false);
@@ -62,13 +78,11 @@ const ImplementationPage = () => {
 
     return (
         <>
-            <h2 className={css.title}>Lägg implementationen här</h2>
-            <div className={css.container}>
-
+            <div className={css["cell-container"]}>
                 {elevatorInterface}
             </div>
 
-            <div>
+            <div className={css["button-container"]}>
                 <input
                     type="number"
                     min="0"
@@ -78,7 +92,7 @@ const ImplementationPage = () => {
                 />
 
                 {loading
-                    ? <p>loading...</p>
+                    ? <div>loading...</div>
                     : <button onClick={onClick}>Elevator</button>}
 
             </div>

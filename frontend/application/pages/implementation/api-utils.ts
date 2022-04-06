@@ -4,13 +4,12 @@ const apiCall = async<T>(
     headers: HeadersInit,
     body?: string
 ): Promise<T> => {
-    const response = await fetch(`http://localhost:3000/${endpoint}`, {
+    const response = await fetch(`http://localhost:3000/api/${endpoint}`, {
         method,
         headers,
         body,
     });
     const parsed = await response.json();
-
     if (response.status !== 200) {
         throw Error(parsed.message);
     };
@@ -19,7 +18,7 @@ const apiCall = async<T>(
 
 export const getInterfaceSpecs = async (): Promise<[number[], number[], string]> => {
     const response = await apiCall<{ elevatorsArray: number[], floorsArray: number[], floors: string }>(
-        "api/init",
+        "init",
         "GET",
         { "accepts": "application/json" }
     );
@@ -28,21 +27,19 @@ export const getInterfaceSpecs = async (): Promise<[number[], number[], string]>
 
 export const getElevatorPositions = async (): Promise<ElevatorPositions> => {
     const response = await apiCall<ElevatorPositions>(
-        "api/positions",
+        "positions",
         "GET",
         { "accepts": "application/json" }
     );
-
     return response;
 };
 
 export const moveElevator = async (destinationFloor: number): Promise<number> => {
     const response = await apiCall<number>(
-        "api/positions",
+        "positions",
         "PATCH",
         { "Content-Type": "application/json" },
         JSON.stringify({ destinationFloor }),
     );
-
     return response;
 };
