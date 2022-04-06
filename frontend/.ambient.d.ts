@@ -7,3 +7,5 @@ declare module "*.module.scss" {
 }
 
 type ElevatorPositions = boolean[][];
+
+type ElevatorRefs = React.MutableRefObject<React.RefObject<HTMLDivElement>[][]>

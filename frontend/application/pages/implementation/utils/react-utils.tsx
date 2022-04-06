@@ -1,33 +1,36 @@
 import * as React from "react";
 import * as css from "../ImplementationPage.module.scss";
 
-import { getElevatorPositions, moveElevator } from "./api-utils"
+import { getElevatorPositions } from "./api-utils"
 
-const getFloorId = (elevator: number, floor: number) => `e${elevator}f${floor}`;
+const getFloorKey = (elevator: number, floor: number) => `e${elevator}f${floor}`;
 
 const generateFloorsJSX = (
     elevator: number,
-    floors: number[]
+    floors: number[],
+    refs: ElevatorRefs
 ): JSX.Element[] => (floors.map((floor) => (
-    <div id={getFloorId(elevator, floor)}
-        key={getFloorId(elevator, floor)}
+    <div
+        key={getFloorKey(elevator, floor)}
+        ref={refs.current[elevator][floor]}
         className={css.cell}>
         F{floor}
     </div>)));
 
 export const createInterfaceJSX = (
     elevators: number[],
-    floors: number[]
+    floors: number[],
+    refs: ElevatorRefs
 ): JSX.Element[] => (elevators.map((elevator) => (
     <div id={(elevator).toString()}
         key={elevator}>
-        {generateFloorsJSX(elevator, floors)}
+        {generateFloorsJSX(elevator, floors, refs)}
     </div>)));
 
-export const visualizeElevators = (elevatorPositions: ElevatorPositions): void => {
+export const visualizeElevators = (elevatorPositions: ElevatorPositions, refs: ElevatorRefs): void => {
     elevatorPositions.forEach((elevators, elevator) => {
         elevators.forEach((elevatorOnFloor, floor) => {
-            const floorElement = document.getElementById(getFloorId(elevator, floor));
+            const floorElement = refs.current[elevator][floor].current
             elevatorOnFloor
                 ? floorElement.classList.add(css["cell--active"])
                 : floorElement.classList.remove(css["cell--active"]);
@@ -35,32 +38,12 @@ export const visualizeElevators = (elevatorPositions: ElevatorPositions): void =
     });
 };
 
-export const poller = async (floorsToTravel: number): Promise<void> => {
+export const poller = async (floorsToTravel: number, refs: ElevatorRefs): Promise<void> => {
     if (floorsToTravel > 0) {
         setTimeout(async () => {
             const elevatorsPositions = await getElevatorPositions();
-            visualizeElevators(elevatorsPositions);
-            poller(floorsToTravel - 1);
-        }, 2000);
-    }
-};
-
-export const onClick = async (
-    maxFloors: string,
-    destinationFloor: string,
-    setErrorMessage: React.Dispatch<React.SetStateAction<string>>
-): Promise<void> => {
-    try {
-        const destinationFloorInt = Number.parseInt(destinationFloor, 10);
-        if (destinationFloorInt > Number.parseInt(maxFloors, 10) || 0 > destinationFloorInt) {
-            throw new Error("Invalid destination floor");
-        }
-        const floorsToTravel = await moveElevator(destinationFloorInt);
-        poller(floorsToTravel);
-    } catch (error) {
-        setErrorMessage(error.message as string);
-        setTimeout(() => {
-            setErrorMessage("");
+            visualizeElevators(elevatorsPositions, refs);
+            poller(floorsToTravel - 1, refs);
         }, 2000);
     }
 };
