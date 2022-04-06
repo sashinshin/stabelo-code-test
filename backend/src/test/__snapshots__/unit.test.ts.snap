@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`1.0 Test api 1.1 GET /api/init 1`] = `
+Object {
+  "message": Object {
+    "elevatorsArray": Array [
+      0,
+      1,
+      2,
+      3,
+      4,
+    ],
+    "floors": "19",
+    "floorsArray": Array [
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13,
+      12,
+      11,
+      10,
+      9,
+      8,
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+      1,
+      0,
+    ],
+  },
+}
+`;
+
+exports[`1.0 Test api 1.2 GET /api/positions 1`] = `
+Object {
+  "message": Object {
+    "elevatorsArray": Array [
+      0,
+      1,
+      2,
+      3,
+      4,
+    ],
+    "floors": "19",
+    "floorsArray": Array [
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13,
+      12,
+      11,
+      10,
+      9,
+      8,
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+      1,
+      0,
+    ],
+  },
+}
+`;
+
+exports[`1.0 Test api 1.3 PATCH /api/positions, returns 200 1`] = `
+Object {
+  "message": 1,
+}
+`;
+
+exports[`1.0 Test api 1.4 PATCH /api/positions, invalid destinationFloor, returns 500 1`] = `
+Object {
+  "message": "Invalid destination floor",
+}
+`;
